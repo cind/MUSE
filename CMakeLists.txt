@@ -55,7 +55,7 @@ if(SCHEDULER)
 	string(TOUPPER ${SCHEDULER} SCHEDULER_U)
 	if (SCHEDULER_U MATCHES "SGE")
 		find_package( QSUB REQUIRED )
-		set (SCHEDULER_SETTING_FILE "SettingsSGE.sh")
+        set (SCHEDULER_SETTING_FILE "SettingsSGE.sh")
 	elseif (SCHEDULER_U MATCHES "PBS")
 		set (SCHEDULER_SETTING_FILE "SettingsPBS.sh")
 	elseif (SCHEDULER_U MATCHES "MISC")
@@ -77,8 +77,8 @@ add_subdirectory(data)
 # copy the manual pdf from source to installdir during install
 # ============================================================================
 
-set (MANUAL_OUTPUT_NAME "${PROJECT_NAME}_Software_Manual")
-set (PROJECT_DOC_DIR "${PROJECT_SOURCE_DIR}/doc")
+set (MANUAL_OUTPUT_NAME "${PROJECT_NAME}_Software_Manual" PARENT_SCOPE)
+set (PROJECT_DOC_DIR "${PROJECT_SOURCE_DIR}/doc" PARENT_SCOPE)
 
 if (EXISTS "${PROJECT_DOC_DIR}/${MANUAL_OUTPUT_NAME}.pdf")
   install (

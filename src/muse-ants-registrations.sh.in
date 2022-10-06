@@ -1,4 +1,6 @@
 #!/bin/bash
+export FSLVERSION=6.0.0
+export ANTSVERSION=ants-2017-12-07
 
 #. ${BASIS_BASH_UTILITIES} || { echo "Failed to source BASIS utilities!" 1>&2; exit 1; }
 . @LIBRARY_DIR@/muse-functions || { echo "Failed to source MUSE functions!" 1>&2; exit 1; }
@@ -31,29 +33,29 @@ OPTIONS:
 Reqd:	-in	  < file >	absolute path to the input file to be registered
 	-ref	  < file >	absolute path to the template/reference file to be used for registration
 	-lab	  < file >	absolute path to the labeled file in the template space
-	 
+
 Opt:	-h         		this help page
 	-dest	  < path >	absolute path to the destination where the results are to be stored (default: same as input)
-	-Sim	  < 0/1 >	apply similarity ranking on the probabilities (default: 1, apply)	
+	-Sim	  < 0/1 >	apply similarity ranking on the probabilities (default: 1, apply)
 	-tmp	  < path >	absolute path to the temporary directory (default: \$CBICA_TMPDIR )
 	-v	  < 0/1 >	verbose output (default: 0 - no output)
 	-reg	  < float >	regularisation weight for the ANTS registration. 0 < \$reg < 1.0 (default: 0.05)
-	-int	   < int >	keep intermediate files. 
+	-int	   < int >	keep intermediate files.
 				0 - delete all intermediate files (default)
-				1 - Keep only the important files. 
-				2 - Keep all intermediate files 
+				1 - Keep only the important files.
+				2 - Keep all intermediate files
 	-V			Version Information
 
 Examples:
-	muse-ants-registrations -in /Path/To/Source/Directory/Input_n3_str.nii.gz -ref /Path/To/Template/Directory/Template10.nii.gz 
-	-lab /Path/To/Template/Directory/Template10_label.nii.gz -dest /Path/To/Destination/Directory/ 
-		Register the Template10.nii.gz image to Input_n3_str.nii.gz and apply the transformation to Template10_label.nii.gz. 
+	muse-ants-registrations -in /Path/To/Source/Directory/Input_n3_str.nii.gz -ref /Path/To/Template/Directory/Template10.nii.gz
+	-lab /Path/To/Template/Directory/Template10_label.nii.gz -dest /Path/To/Destination/Directory/
+		Register the Template10.nii.gz image to Input_n3_str.nii.gz and apply the transformation to Template10_label.nii.gz.
 		It'll also generate the similarity map between the input and registered reference images
-	
-	qsub muse-ants-registrations -in /Path/To/Source/Directory/Input_n3_str.nii.gz -ref /Path/To/Template/Directory/Template10.nii.gz 
+
+	qsub muse-ants-registrations -in /Path/To/Source/Directory/Input_n3_str.nii.gz -ref /Path/To/Template/Directory/Template10.nii.gz
 	-lab /Path/To/Template/Directory/Template10_label.nii.gz -dest /Path/To/Destination/Directory/ -scripts `dirname $0`
 		Submit the muse-ants-registrations script to SGE which will internally do the processing and store the results in the destination
-		
+
 ERROR: Not enough arguments!!
 ##############################################
 
@@ -65,12 +67,12 @@ exit 1
 cleanUpandExit()
 {
 	echo -e ":o:o:o:o:o Aborting Operations .... \n\n"
-	
+
 	if [ -d "$TMP" ]
 	then
 		rm -rfv ${TMP}
 	fi
-	
+
 	executionTime
 	exit 1
 }
@@ -79,73 +81,73 @@ parse()
 {
 	while [ -n "$1" ]; do
 		case $1 in
-			-h) 
+			-h)
 				help;
 				shift 1;;
-		     	-in) 
+		     	-in)
 				input=$2;
-				
+
 				checkFile $input
-				temp=`FileAtt $input`				
+				temp=`FileAtt $input`
 				InExt=`echo $temp | awk '{ print $1 }'`
 				InbName=`echo $temp | awk '{ print $2 }'`
 				InDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				input=${InDir}/${InbName}.${InExt}
-				
+
 				shift 2;;
-			-ref) 
+			-ref)
 				ref=$2;
-				
+
 				checkFile $ref
-				temp=`FileAtt $ref`				
+				temp=`FileAtt $ref`
 				RefExt=`echo $temp | awk '{ print $1 }'`
 				RefbName=`echo $temp | awk '{ print $2 }'`
 				RefDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				ref=${RefDir}/${RefbName}.${RefExt}
 
 				shift 2;;
-			-lab) 
+			-lab)
 				lab=$2;
-				
+
 				checkFile $lab
-				temp=`FileAtt $lab`				
+				temp=`FileAtt $lab`
 				LabExt=`echo $temp | awk '{ print $1 }'`
 				LabbName=`echo $temp | awk '{ print $2 }'`
 				LabDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				lab=${LabDir}/${LabbName}.${LabExt}
 
 				shift 2;;
-			-dest) 
+			-dest)
 				dest=`checkPath $2`;
 				shift 2;;
-			-tmp) 
+			-tmp)
 				tmpDirToUse=`checkPath $2`;
 				shift 2;;
-			-int) 
+			-int)
 				int=$2;
 				shift 2;;
-			-reg) 
+			-reg)
 				reg=$2;
 				shift 2;;
-			-Sim) 
+			-Sim)
 				Sim=$2;
 				shift 2;;
-			-scripts) 
+			-scripts)
 				scripts=`checkPath $2`;
 				shift 2;;
-			-v) 
+			-v)
 				verbose=$2;
 				shift 2;;
-			-V) 
-				print_version; 
+			-V)
+				print_version;
 				exit 0;;
-			-*) 
+			-*)
 				echo "ERROR: no such option $1";
 				help;;
-			 *) 
+			 *)
 				break;;
 		esac
 	done
@@ -158,7 +160,7 @@ convertToNifti()
 	if [ -f ${1%.img}.nii.gz ]
 	then
 		echoV "\nConverted to NIFTIGZ: $1"
-		rmV ${1} 
+		rmV ${1}
 		rmV ${1%.img}.hdr
 	else
 		echoV "\nConversion to NIFTIGZ failed: $1"
@@ -170,7 +172,7 @@ import()
 	ext=$1
 	inFile=$2
 	outFile=$3
-	
+
 	if [ "${ext}" == "nii.gz" ]
 	then
 		echoV "nifti1_test -n2 ${inFile} ${outFile}"
@@ -187,7 +189,7 @@ import()
 	then
 		echoV "nifti1_test -n2 ${inFile} ${outFile}"
 		nifti1_test -n2 ${inFile} ${outFile}
-	fi	
+	fi
 }
 
 ################################################ END OF FUNCTIONS ################################################
@@ -232,9 +234,9 @@ FSLOUTPUTTYPE=NIFTI_GZ; export $FSLOUTPUTTYPE
 
 
 ### Specifying the trap signal
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM 
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM
 trap "checkExitCode 1 '\nProgram Interrupted. Received SIGKILL signal'" SIGKILL
 
 ### Reading the arguments
@@ -322,7 +324,7 @@ then
 	 -o ${refInSpace} \
 	 -t SyN[${reg}] \
 	 -r Gauss[2,0] \
-	 -v;	 
+	 -v;
 else
 	ANTS \
 	 3 \
@@ -462,7 +464,7 @@ fi
 
 rmdirV $TMP
 
-### Execution Time 
+### Execution Time
 executionTime $startTimeStamp
 
 ################################################ END ################################################

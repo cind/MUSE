@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@VENV@/bin/python
 
 import os, sys
 
@@ -22,7 +22,7 @@ def usage():
   Usage: %(EXEC)s [OPTIONS]
 
   OPTIONS:
-  
+
   Basic:
     [-i --input     ]	< file	>	Input image
     [-M --mask	    ]	< file >	Mask image in the --input image space (optional)
@@ -118,15 +118,15 @@ for o, a in opts:
 ### Sanity check on the arguments
 if not datafile:
 	print("ERROR: Input file not provided!!!")
-	sys.exit(0) 
+	sys.exit(0)
 
 if derived == 1 and not mapcsv:
 	print("ERROR: Map csv file not provided!!!")
-	sys.exit(0) 
+	sys.exit(0)
 
 #if derived == 1 and not icvfile:
 #	print "ERROR: File to calculate ICV not provided!!!"
-#	sys.exit(0) 
+#	sys.exit(0)
 
 ### Read the input image
 data = nib.load(os.path.join(datafile))
@@ -157,8 +157,8 @@ if derived == 1 and icvfile:
 
 	icvvoxdims = icvhdr.structarr["pixdim"]
 	icvvoxvol = float(icvvoxdims[1]*icvvoxdims[2]*icvvoxdims[3])
-	
-	
+
+
 ### Decide on the ROIs to calculate volume for
 if intensity:
 	ROIs = [ intensity ]
@@ -181,13 +181,13 @@ DerivedVols = []
 ### Calculate derived volumes if requested
 if derived == 1:
 	import csv
-	
+
 #	with open(mapcsv, 'rb') as mapcsvfile:
 	with open(mapcsv) as mapcsvfile:
 		reader = csv.reader(mapcsvfile, delimiter=',')
-		
+
 		# Read each line in the csv map files
-		for row in reader:			
+		for row in reader:
 			# Calculate ICV
 			if row[0] == '702':
 				if icvfile:
@@ -206,7 +206,7 @@ if derived == 1:
 					# Check if the roi exists in the list. If it does, calculate, else just say 0
 					if ROIs[ ROIs == int(row[ roi ]) ]:
 						vol += Volumes[ ROIs == int(row[ roi ]) ][0]
-					
+
 				DerivedVols.append(vol)
 
 ### Decide what to output

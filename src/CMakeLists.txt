@@ -37,70 +37,70 @@
 # This command can not only be used to build executables from C/C++, but also
 # source code written in other programming languages such as Java, Python, Perl,
 # MATLAB, and Bash.
-
 #basis_add_executable (muse.sh NO_BASIS_UTILITIES)
 configure_file( muse.sh.in ${CMAKE_BINARY_DIR}/src/muse.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION bin 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION bin
 	RENAME muse )
 
 #basis_add_executable (muse-calculateVolumes.py NO_BASIS_UTILITIES)
 configure_file( muse-calculateVolumes.py ${CMAKE_BINARY_DIR}/src/muse-calculateVolumes.py @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-calculateVolumes.py 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION bin 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-calculateVolumes.py
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION bin
 	RENAME muse-calculateVolumes )
 
 
 #basis_add_executable (muse-functions.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-functions.sh.in ${CMAKE_BINARY_DIR}/src/muse-functions.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-functions.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-functions.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-functions )
 #basis_add_executable (muse-dramms-registrations.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-dramms-registrations.sh.in ${CMAKE_BINARY_DIR}/src/muse-dramms-registrations.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-dramms-registrations.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-dramms-registrations.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-dramms-registrations )
 #basis_add_executable (muse-ants-registrations.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-ants-registrations.sh.in ${CMAKE_BINARY_DIR}/src/muse-ants-registrations.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-ants-registrations.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-ants-registrations.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-ants-registrations )
 #basis_add_executable (muse-calculateSimilarityMap.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-calculateSimilarityMap.sh.in ${CMAKE_BINARY_DIR}/src/muse-calculateSimilarityMap.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-calculateSimilarityMap.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-calculateSimilarityMap.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-calculateSimilarityMap )
 #basis_add_executable (muse-labelFusion.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-labelFusion.sh.in ${CMAKE_BINARY_DIR}/src/muse-labelFusion.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-labelFusion.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-labelFusion.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-labelFusion )
 #basis_add_executable (muse-combine1ROI.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-combine1ROI.sh.in ${CMAKE_BINARY_DIR}/src/muse-combine1ROI.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-combine1ROI.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-combine1ROI.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-combine1ROI )
 #basis_add_executable (muse-combineAll.sh LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-combineAll.sh.in ${CMAKE_BINARY_DIR}/src/muse-combineAll.sh.in @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-combineAll.sh.in 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-combineAll.sh.in
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-combineAll )
 #basis_add_executable (muse-combineRoiMapsIter.py LIBEXEC NO_BASIS_UTILITIES)
 configure_file( muse-combineRoiMapsIter.py ${CMAKE_BINARY_DIR}/src/muse-combineRoiMapsIter.py @ONLY )
-install( FILES ${CMAKE_BINARY_DIR}/src/muse-combineRoiMapsIter.py 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
-	DESTINATION lib 
+install( FILES ${CMAKE_BINARY_DIR}/src/muse-combineRoiMapsIter.py
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	DESTINATION lib
 	RENAME muse-combineRoiMapsIter )
+
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -132,8 +132,8 @@ add_executable( calculateSimilarityMap calculateSimilarityMap.c )
 #basis_target_link_libraries(calculateSimilarityMap simlib)
 target_link_libraries( calculateSimilarityMap simlib )
 
-install( FILES ${CMAKE_BINARY_DIR}/src/calculateSimilarityMap 
-	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ 
+install( FILES ${CMAKE_BINARY_DIR}/src/calculateSimilarityMap
+	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
 	DESTINATION lib )
 
 if(SCHEDULER)

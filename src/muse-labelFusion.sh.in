@@ -1,4 +1,6 @@
 #!/bin/bash
+export FSLVERSION=6.0.0
+export ANTSVERSION=ants-2017-12-07
 
 #. ${BASIS_BASH_UTILITIES} || { echo "Failed to source BASIS utilities!" 1>&2; exit 1; }
 . @LIBRARY_DIR@/muse-functions || { echo "Failed to source MUSE functions!" 1>&2; exit 1; }
@@ -27,14 +29,14 @@ This script does the following:
 USAGE :	$0 [OPTIONS]
 OPTIONS:
 
-Required:	
-	-in 	   < file >	absolute path to the input file 
+Required:
+	-in 	   < file >	absolute path to the input file
 	-dest	   < path >	absolute path to the destination where the results are to be stored
 	-ROI	   < file >	list of ROIs to be considered
 	-Templates < file >	a file containing the list of templates to be considered
 
-Processing:	
-	-ic	   < 0/1 >	apply intensity correction using z-scores (default: 0, do not correct)	
+Processing:
+	-ic	   < 0/1 >	apply intensity correction using z-scores (default: 0, do not correct)
 	-Sim	   < 0/1 >	apply similarity ranking on the probabilities (default: 1, apply)
 	-Fuzzy	   < 0/1 >	add fuzzy segmentation as a weight to the probabilities (default: 0, do not apply)
 	-regs	   < int >	No. of templates to be used for registrations (default: 11)
@@ -45,23 +47,23 @@ Processing:
 				1 - only use dramms (default)
 				2 - only use ants
 				3 - use both dramms as well as ants
-				
-Output:	
+
+Output:
 	-comb	   < pattern >	prefix for the binary/discrete combined ROI mask (default: no/off)
 	-tmp	   < path >	absolute path to the temporary directory (default: \$CBICA_TMPDIR )
 	-Ranks	   < 0/1 >	keep the Weighted Rank masks (default: 0-delete)
 				if -comb option is not used, then this is ON by default, i.e. rank masks will be retained
-	-int	   < int >	keep intermediate files. 
+	-int	   < int >	keep intermediate files.
 				0 - delete all intermediate files (default)
-				1 - Keep only the important files. 
-				2 - Keep all intermediate files 
+				1 - Keep only the important files.
+				2 - Keep all intermediate files
 
-Scheduler:	
+Scheduler:
 	-NOQ			Flag indicating that SGE cluster is not to be used
 	-MT	   < int >	an integer value indicating the number of threads to use for multi-threading (default: 1)
 	-log	   < path >	absolute path to the SGE directory (default: ${HOME}/muse_log_files )
-	
-Miscellaneous:	
+
+Miscellaneous:
 	-v	   < 0/1 >	verbose output (default: 0 - verbose off)
 	-V			Version Information
 
@@ -75,7 +77,7 @@ exit 1
 cleanUpandExit()
 {
 	echo -e ":o:o:o:o:o Aborting Operations .... \n\n"
-	
+
 	if [ -d "$TMP" ]
 	then
 		BGjobs=`jobs -p`
@@ -90,13 +92,13 @@ cleanUpandExit()
 			rmV ${TMP}${AllSimRanked}
 			rmV ${TMP}${InbName%.nii.gz}_RankMasks.lst
 			rmV ${TMP}${InbName}.nii.gz
-			
+
 			for i in $(cat $Templates)
 			do
 				rmV ${TMP}Template${i}${SimRank}
-				rmV ${TMP}Template${i}${final}	
+				rmV ${TMP}Template${i}${final}
 			done
-			
+
 			while read label
 			do
 				rmV ${TMP}${InbName%.nii.gz}_ROI_${label}${RankMask}
@@ -110,8 +112,8 @@ cleanUpandExit()
 			fi
 		fi
 	fi
-	
-	executionTime		
+
+	executionTime
 	exit 1
 }
 
@@ -119,100 +121,100 @@ parse()
 {
 	while [ -n "$1" ]; do
 		case $1 in
-			-h) 
+			-h)
 				help;
 				shift 1;;
-		     	-in) 
+		     	-in)
 				input=$2;
-				
+
 				checkFile $input
-				
-				temp=`FileAtt $input`				
+
+				temp=`FileAtt $input`
 				InExt=`echo $temp | awk '{ print $1 }'`
 				InbName=`echo $temp | awk '{ print $2 }'`
 				InDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				input=${InDir}/${InbName}.${InExt}
-				
+
 				shift 2;;
-		     	-WML) 
+		     	-WML)
 				WML=$2;
 
 				checkFile $WML
-				
-				temp=`FileAtt $WML`				
+
+				temp=`FileAtt $WML`
 				WMLExt=`echo $temp | awk '{ print $1 }'`
 				WMLbName=`echo $temp | awk '{ print $2 }'`
 				WMLDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				WML=${WMLDir}/${WMLbName}.${WMLExt}
 
 				shift 2;;
-			-dest) 
+			-dest)
 				dest=`checkPath $2`;
 				shift 2;;
-			-ROI) 
+			-ROI)
 				ROI=$2;
 				checkFile $ROI;
 				shift 2;;
 			-Templates)
 				Templates=$2;
 				shift 2;;
-			-tmp) 
+			-tmp)
 				tmpDirToUse=`checkPath $2`;
 				shift 2;;
-			-log) 
+			-log)
 				log=`checkPath $2`;
 				shift 2;;
-			-regs) 
+			-regs)
 				regs=$2;
 				shift 2;;
-			-MT) 
+			-MT)
 				MT=$2;
 				shift 2;;
-			-Ranks) 
+			-Ranks)
 				Ranks=$2;
 				shift 2;;
-			-v) 
+			-v)
 				verbose=$2;
 				shift 2;;
-			-comb) 
+			-comb)
 				comb=$2;
 				shift 2;;
-			-scripts) 
+			-scripts)
 				scripts=`checkPath $2`;
 				shift 2;;
-			-ic) 
+			-ic)
 				ic=$2;
 				shift 2;;
-			-Sim) 
+			-Sim)
 				Sim=$2;
 				shift 2;;
-			-Fuzzy) 
+			-Fuzzy)
 				useFuzzy=$2;
 				shift 2;;
-			-CSF) 
+			-CSF)
 				CSF=$2;
 				shift 2;;
-			-int) 
+			-int)
 				int=$2;
 				shift 2;;
-			-NOQ) 
+			-NOQ)
 				NOQ=1;
 				shift 1;;
-			-method) 
+			-method)
 				method=$2;
 				shift 2;;
-			-smooth) 
+			-smooth)
 				smooth=$2;
 				shift 2;;
-			-V) 
-				print_version; 
+			-V)
+				print_version;
 				exit 0;;
-			-*) 
+			-*)
 				echo "ERROR: no such option $1";
 				help;;
-			 *) 
+			 *)
 				break;;
 		esac
 	done
@@ -223,7 +225,7 @@ import()
 	ext=$1
 	inFile=$2
 	outFile=$3
-	
+
 	if [ ! -f ${outFile}.nii ]
 	then
 		if [ "${ext}" == "nii.gz" ] || [ "${ext}" == "nii" ] || [ "${ext}" == "img" ]
@@ -234,7 +236,7 @@ import()
 		then
 			echoV "nifti1_test -n1 ${inFile%.hdr}.img ${outFile}"
 			nifti1_test -n1 ${inFile%.hdr}.img ${outFile}
-		fi	
+		fi
 	fi
 }
 
@@ -272,7 +274,7 @@ echo -e "Start time			: ${startTime}\n"
 #checkDependency	3dMean
 #checkDependency	3dTsort
 #checkDependency	3dBrickStat
-#		
+#
 #checkDependency	fslmerge
 #checkDependency	fslsplit
 #
@@ -305,9 +307,9 @@ method=1
 smooth=0
 
 ### Specifying the trap signal
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM 
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM
 trap "checkExitCode 1 '\nProgram Interrupted. Received SIGKILL signal'" SIGKILL
 
 ### Reading the arguments
@@ -397,7 +399,7 @@ then
 	then
 		echo -e "\tWeighted ROI Masks		: ${dest}${InbName%.nii.gz}_ROI_*${RankMask}"
 	fi
-	
+
 	if [ -n "$comb" ]
 	then
 		echo -e "\tCombined ROI Mask		: ${dest}${comb}"
@@ -448,9 +450,9 @@ then
 	if [ $smooth -gt 0 ]
 	then
 		echoV "----->	Smoothing the Similarity Maps by $smooth mm ..." 1
-		
+
 		for i in $(cat $Templates)
-		do 
+		do
 			for registrationmethod in $methodList
 			do
 
@@ -470,7 +472,7 @@ then
 					sleep 0.1s
 					BGjobsNum=`jobs -p | wc -l`
 				done
-				
+
 				if [ "$verbose" == "1" ]
 				then
 					3dmerge \
@@ -481,10 +483,10 @@ then
 					3dmerge \
 					 -1blur_fwhm $smooth \
 					 -prefix ${TMP}${InbName}-Template${i}${Similarity}_${registrationmethod}_s${smooth}.nii.gz \
-					 ${dest}${InbName}-Template${i}${Similarity}_${registrationmethod}.nii.gz > ${TMP}Debug.log 2>&1 || { echo $i ${registrationmethod} >> ${TMP}muse-Extract1ROI-${PID}_Error.log; } &				 
+					 ${dest}${InbName}-Template${i}${Similarity}_${registrationmethod}.nii.gz > ${TMP}Debug.log 2>&1 || { echo $i ${registrationmethod} >> ${TMP}muse-Extract1ROI-${PID}_Error.log; } &
 				 fi
 			done
-		done		
+		done
 
 		BGjobs=`jobs -p`
 		wait $BGjobs
@@ -492,19 +494,19 @@ then
 		if [ -f ${TMP}muse-Extract1ROI-${PID}_Error.log ] && [ -n "`cat ${TMP}muse-Extract1ROI-${PID}_Error.log`" ]
 		then
 			FailedTemps=`cat ${TMP}muse-Extract1ROI-${PID}_Error.log`
-	
+
 			checkExitCode 1 "\nERROR: Smoothing of the similarity map failed for the following combination of templates and registration methods: `echo -e "\n$FailedTemps"`";
-		fi	
+		fi
 	fi
 
 	### Creating a 4D dataset of the Similarities
 	echoV "----->	Creating a 4D dataset of the Similarity Maps ..." 1
-	
+
 	# Creating a filelist of Similarities based on whether it was smoothed or not
 	if [ $smooth -gt 0 ]
 	then
 		for i in $(cat $Templates)
-		do 
+		do
 			for registrationmethod in $methodList
 			do
 				ls ${TMP}${InbName}-Template${i}${Similarity}_${registrationmethod}_s${smooth}.nii.gz
@@ -512,14 +514,14 @@ then
 		done > ${TMP}AllSimilarities.txt
 	else
 		for i in $(cat $Templates)
-		do 
+		do
 			for registrationmethod in $methodList
 			do
 				ls ${dest}${InbName}-Template${i}${Similarity}_${registrationmethod}.nii.gz
 			done
 		done > ${TMP}AllSimilarities.txt
 	fi
-	 
+
 	echoV "\n--> fslmerge \n
 	 -t ${TMP}${AllSim%.nii.gz} \n
 	 `cat ${TMP}AllSimilarities.txt`;"
@@ -588,7 +590,7 @@ then
 		else
 			mvV ${TMP}vol00${i}.nii.gz ${TMP}$(basename ${j%.nii.gz})${final}
 			i=`echo "scale=0; $i + 1" | bc`
-		fi	
+		fi
 	done
 
 	### Removing any temporary files from the temporary folder
@@ -715,7 +717,7 @@ do
 
 		### Importing the label image
 		import nii.gz ${dest}${InbName}-Template${i}${InSpace}_${registrationmethod}.nii.gz ${TMP}${InbName}-Template${i}${InSpace}_${registrationmethod}.nii.gz
-	
+
 		while read label
 		do
 			if [ ! -f ${TMP}${label}/${InbName}-Template${i}${InSpace}_${registrationmethod}_ROI.nii.gz ]
@@ -736,9 +738,9 @@ do
 					sleep 0.1s
 					BGjobsNum=`jobs -p | wc -l`
 				done
-	
+
 				mkdirV ${TMP}${label}
-	
+
 				if [ "$label" == "0" ]
 				then
 					3dcalc \
@@ -758,17 +760,17 @@ do
 					 -float > ${TMP}Debug.log 2>&1 || { echo $i ${label} >> ${TMP}muse-Extract1ROI-${PID}_Error.log; } &
 
 				fi
-		
+
 				if [ -f ${TMP}muse-Extract1ROI-${PID}_Error.log ] && [ -n "`cat ${TMP}muse-Extract1ROI-${PID}_Error.log`" ]
 				then
 					BGjobs=`jobs -p`
 					wait $BGjobs
-			
+
 					FailedROIs=`cat ${TMP}muse-Extract1ROI-${PID}_Error.log | head -1`
-			
+
 					checkExitCode 1 "\nERROR: Extracting the ROI `echo $FailedROIs | awk '{ print $2 }'` from ${InbName}-Template`echo $FailedROIs | awk '{ print $1 }'`${InSpace}_${registrationmethod}.nii failed!!!!!!";
 				fi
-		 
+
 			fi
 		done < ${TMP}ROIs.lst
 	done
@@ -792,11 +794,11 @@ do
 		else
 			CMD="${scripts}muse-combine1ROI"
 		fi
-	
+
 		### Checking if its a WM ROI
 		if [ -n "`grep -w ${label} ${TMP}WM.lst`" ]
 		then
-			WM=1; 
+			WM=1;
 		else
 			WM=0;
 		fi
@@ -804,7 +806,7 @@ do
 		### Checking if its a background ROI
 		if [ "${label}" == "0" ]
 		then
-			BG=1; 
+			BG=1;
 		else
 			BG=0;
 		fi
@@ -816,9 +818,9 @@ do
 			then
 				Fuzzy=${TMP}${InbName}_csf.nii;
 			else
-				Fuzzy=${TMP}${InbName}_gm+wm.nii; 
+				Fuzzy=${TMP}${InbName}_gm+wm.nii;
 			fi
-			
+
 			CMD="$CMD -Fuzzy $Fuzzy"
 		fi
 
@@ -838,9 +840,9 @@ do
 			sleep 1s
 			BGjobsNum=`jobs -p | wc -l`
 		done
-		
+
 		echoV "\t-->	Processing ROI $label" 1
-		
+
 		CMD="${CMD} \
 		 -in ${TMP}${InbName}.nii \
 		 -src ${TMP}${label} \
@@ -857,7 +859,7 @@ do
 		 -method $method \
 		 -v $verbose \
 		 -smooth $smooth"
-		 
+
 		if [ $MT -eq 1 ]
 		then
 			$CMD > ${TMP}muse-combine1ROI-${PID}_ROI_${label}.log 2>&1 || { echo ${label} >> ${TMP}muse-combine1ROI-${PID}_Error.log; }
@@ -869,14 +871,14 @@ do
 		then
 			BGjobs=`jobs -p`
 			wait $BGjobs
-			
+
 			FailedROIs=`cat ${TMP}muse-combine1ROI-${PID}_Error.log`
-			
+
 			checkExitCode 1 "\nERROR: Creation of probability map failed for these ROI: ${FailedROIs}!!!";
 		fi
-	
+
 	fi
-	
+
 done < ${TMP}ROIs.lst
 
 BGjobs=`jobs -p`
@@ -884,7 +886,7 @@ wait $BGjobs
 
 ### Combining the Rank Masks into a final mask if requested by the uses
 if [ -n "$comb"  ]
-then	
+then
 	### If the user requests, transfer the individual Rank Masks into the destination
 	echoV "----->	Moving the Rank Masks to ${dest} ..." 1
 	while read label
@@ -898,7 +900,7 @@ then
 	do
 		ls ${dest}${InbName%.nii.gz}_ROI_${label}${RankMask} >> ${dest}${InbName%.nii.gz}_RankMasks.lst
 	done < ${TMP}ROIs.lst
-	
+
 	### Run combination
 	echoV "----->	Combining the Rank Masks  ..." 1
 
@@ -911,7 +913,7 @@ then
 	 -int ${int} \n
 	 -tmp ${TMP} \n
 	 -v $verbose;"
-	
+
 
 	if [ "$verbose" == "1" ]
 	then
@@ -923,7 +925,7 @@ then
 		 -Ranks $Ranks \
 		 -int ${int} \
 		 -tmp ${TMP} \
-		 -v $verbose;	
+		 -v $verbose;
 	else
 		${scripts}muse-combineAll \
 		 -R ${dest}${InbName%.nii.gz}_RankMasks.lst \
@@ -933,10 +935,10 @@ then
 		 -Ranks $Ranks \
 		 -int ${int} \
 		 -tmp ${TMP} \
-		 -v $verbose > ${TMP}muse-combineAll-${PID}.log 2>&1	
+		 -v $verbose > ${TMP}muse-combineAll-${PID}.log 2>&1
 	fi
 
-fi	
+fi
 
 
 ### Remove temporary files from the temporary folder
@@ -961,7 +963,7 @@ then
 	then
 		rmV ${TMP}${WMLbName}.nii
 	fi
-	
+
 	if [ "$useFuzzy" == "1" ]
 	then
 		for tissue in gm wm csf gm+wm labels
@@ -1033,7 +1035,7 @@ fi
 if [ "$int" == 0 ]
 then
 	echoV "----->	Removing temporary files from the destination ..." 1
-	
+
 	for i in $(cat $Templates)
 	do
 		for registrationmethod in $methodList
@@ -1042,12 +1044,12 @@ then
 			then
 				rmV ${dest}${InbName}-Template${i}${Similarity}_${registrationmethod}.nii.gz
 			fi
-	
+
 			if [ -f ${dest}${InbName}-Template${i}_InSpace_${registrationmethod}.nii.gz ]
 			then
 				rmV ${dest}${InbName}-Template${i}_InSpace_${registrationmethod}.nii.gz
 			fi
-	
+
 			rmV ${dest}${InbName}-Template${i}${InSpace}_${registrationmethod}.nii.gz
 
 		done

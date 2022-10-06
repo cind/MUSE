@@ -1,5 +1,6 @@
 #!/bin/bash
 #include<string.h>
+export FSLVERSION=6.0.0
 
 . @LIBRARY_DIR@/muse-functions || { echo "Failed to source MUSE functions!" 1>&2; exit 1; }
 
@@ -27,7 +28,7 @@ This script does the following:
 USAGE :	$0 [OPTIONS]
 OPTIONS:
 
-Reqd:	-a 	   < file >	absolute path to the input file 
+Reqd:	-a 	   < file >	absolute path to the input file
 	-b	   < path >	absolute path to the destination where the results are to be stored
 	-sim	   < file >	list of ROIs to be considered
 
@@ -44,7 +45,7 @@ exit 1
 cleanUpandExit()
 {
 	echo -e ":o:o:o:o:o Aborting Operations .... \n\n"
-	
+
 	if [ -d "$TMP" ]
 	then
 		if [ "$TMP" == "$dest" ]
@@ -53,13 +54,13 @@ cleanUpandExit()
 			rmV ${TMP}${AllSimRanked}
 			rmV ${TMP}${InbName%.nii.gz}_RankMasks.lst
 			rmV ${TMP}${InbName}.nii.gz
-			
+
 			for i in $(cat $Templates)
 			do
 				rmV ${TMP}Template${i}${SimRank}
-				rmV ${TMP}Template${i}${final}	
+				rmV ${TMP}Template${i}${final}
 			done
-			
+
 			while read label
 			do
 				rmV ${TMP}${InbName%.nii.gz}_ROI_${label}${RankMask}
@@ -73,8 +74,8 @@ cleanUpandExit()
 			fi
 		fi
 	fi
-	
-	executionTime		
+
+	executionTime
 	exit 1
 }
 
@@ -82,56 +83,56 @@ parse()
 {
 	while [ -n "$1" ]; do
 		case $1 in
-			-h) 
+			-h)
 				help;
 				shift 1;;
-		     	-a) 
+		     	-a)
 				InpA=$2;
-				
+
 				checkFile $InpA
-				
-				temp=`FileAtt $InpA`				
+
+				temp=`FileAtt $InpA`
 				InpAExt=`echo $temp | awk '{ print $1 }'`
 				InpAbName=`echo $temp | awk '{ print $2 }'`
 				InpADir=`echo $temp | awk '{ print $3 }'`
-				
+
 				InpA=${InpADir}/${InpAbName}.${InpAExt}
-				
+
 				shift 2;;
-		     	-b) 
+		     	-b)
 				InpB=$2;
 
 				checkFile $InpB
-				
-				temp=`FileAtt $InpB`				
+
+				temp=`FileAtt $InpB`
 				InpBExt=`echo $temp | awk '{ print $1 }'`
 				InpBbName=`echo $temp | awk '{ print $2 }'`
 				InpBDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				InpB=${InpBDir}/${InpBbName}.${InpBExt}
 
 				shift 2;;
-			-sim) 
+			-sim)
 				Sim=$2;
-				
+
 				temp=`FileAtt $Sim`
 				SimExt=`echo $temp | awk '{ print $1 }'`
 				SimbName=`echo $temp | awk '{ print $2 }'`
 				SimDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				Sim=${SimDir}/${SimbName}.${SimExt}
 
 				shift 2;;
-			-v) 
+			-v)
 				verbose=$2;
 				shift 2;;
-			-V) 
-				print_version; 
+			-V)
+				print_version;
 				exit 0;;
-			-*) 
+			-*)
 				echo "ERROR: no such option $1";
 				help;;
-			 *) 
+			 *)
 				break;;
 		esac
 	done
@@ -142,7 +143,7 @@ import()
 	ext=$1
 	inFile=$2
 	outFile=$3
-	
+
 	if [ ! -f ${outFile}.hdr ]
 	then
 		if [ "${ext}" == "nii.gz" ] || [ "${ext}" == "nii" ] || [ "${ext}" == "img" ]
@@ -153,7 +154,7 @@ import()
 		then
 			echoV "nifti1_test -n2 ${inFile%.hdr}.img ${outFile}"
 			nifti1_test -n2 ${inFile%.hdr}.img ${outFile}
-		fi	
+		fi
 	fi
 }
 
@@ -192,9 +193,9 @@ scripts=@LIBRARY_DIR@/
 verbose=0
 
 ### Specifying the trap signal
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM 
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM
 trap "checkExitCode 1 '\nProgram Interrupted. Received SIGKILL signal'" SIGKILL
 
 ### Reading the arguments
@@ -250,7 +251,7 @@ CMD="${DIR_EXE}/ConvertImage \
 	${TMP}${InpAbName}.img \
 	${TMP}/A_byte_iter1.img \
 	-v -v"
-	
+
 if [ "$verbose" == "1" ]
 then
 	$CMD
@@ -281,7 +282,7 @@ CMD="${DIR_EXE}/ConvertImage \
 	${TMP}${InpBbName}.img \
 	${TMP}/B_byte_iter1.img \
 	-v -v"
-	
+
 if [ "$verbose" == "1" ]
 then
 	$CMD
@@ -308,9 +309,9 @@ do
 			${TMP}/${im}_byte_iter${prev_iter}.img \
 			${TMP}/${im}_byte_iter${iter}.img \
 			-v -v | grep 'max' | cut -d'=' -f3 | cut -d'.' -f1`
-		
+
 		echoV "max=${max}"
-	
+
 		if [ ${max} -gt 200 ]
 		then
 			mvV ${TMP}/${im}_byte_iter${iter}.img ${TMP}/${im}_byte.img
@@ -328,7 +329,7 @@ echoV "${DIR_EXE}/ConvertImage \n
 	-t float \n
 	${TMP}${InpBbName}.img \n
 	${TMP}/tmpfloat.img;"
-	
+
 CMD="${DIR_EXE}/ConvertImage \
 	-e \
 	--reset-scaling \
@@ -372,7 +373,7 @@ do
 		-x2 \n
 		${im}_byte.img \n
 		${im};"
-	
+
 	CMD="${DIR_EXE}/CalculateGaborTextures \
 		 -s$numGaborScales \
 		 -o$numGaborOrientations \
@@ -380,7 +381,7 @@ do
 		 -x2 \
 		 ${im}_byte.img \
 		 ${im}"
-		 
+
 	if [ "$verbose" == "1" ]
 	then
 		$CMD
@@ -388,7 +389,7 @@ do
 		$CMD > ${TMP}Debug.log 2>&1;
 	fi
 	checkExitCode $? "\nERROR: Genrating Gabor features for Image ${im} failed!!!"
-done	 
+done
 
 ### Generating Gabor list files
 echoV "----->	Generating Gabor list files ..." 1
@@ -397,14 +398,14 @@ for im in A B
 do
 	echoV "\t-->	Processing input image $im" 1
 	CMD="${DIR_EXE}/GenerateGaborListFile -s2 -o$numGaborOrientations $im Gabor_${im}.lst"
-	
+
 	if [ "$verbose" == "1" ]
 	then
 		$CMD
 	else
 		$CMD > ${TMP}Debug.log 2>&1;
 	fi
-	
+
 	sed -i 's/.nii.gz/.img/g' Gabor_${im}.lst
 done
 
@@ -459,7 +460,7 @@ else
 	rm -rf ${TMP}
 fi
 
-### Execution Time 
+### Execution Time
 executionTime $startTimeStamp
 
 ################################################ END ################################################

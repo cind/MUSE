@@ -1,4 +1,7 @@
 #!/bin/bash
+export FSLVERSION=6.0.0
+export ANTSVERSION=ants-2017-12-07
+export FSLOUTPUTTYPE=NIFTI_GZ
 
 #. ${BASIS_BASH_UTILITIES} || { echo "Failed to source BASIS utilities!" 1>&2; exit 1; }
 
@@ -26,8 +29,8 @@ cat <<HELP
 
 ##############################################
 This script does the following:
-	
-	- MUSE is a Multi Atlas ROI Segmentation tool that uses the multi-atlas registration based approach 
+
+	- MUSE is a Multi Atlas ROI Segmentation tool that uses the multi-atlas registration based approach
 	  along with intensity weighting to parcellate the given human brain into a set of 153 regions of anatomical interest.
 
 USAGE :	$0 -i <file> [OPTIONS]
@@ -37,22 +40,22 @@ OPTIONS:
 REQD
 	[-i, --in]	   < file >	absolute path to the input file to be labeled
 
-OPTIONAL	 
-Data:	
+OPTIONAL
+Data:
 	[-r, --refPath]     < path >	absolute path to the template directory
 					(default: a set of 35 images included in the package)
 	[-n, --refNum]	   < int >	number of templates included in the path defined by -refPath
 					(default: the package already includes a set of 35 templates)
-	[-R, --ROI]	   < file >	absolute path to the list containing the ROIs to be considered 
+	[-R, --ROI]	   < file >	absolute path to the list containing the ROIs to be considered
 					(default: @DATA_DIR@/List/MUSE_ROI.csv)
-	[-D, --dest]	   < path >	absolute path to the destination directory where the results are to be stored 
+	[-D, --dest]	   < path >	absolute path to the destination directory where the results are to be stored
 					(default: same as input)
 	[-o, --mask]	   < pattern >	Prefix of the output labeled ROI image (without the extension or the path)
 					(default: input_muse)
-	[-t, --tmp]	   < path >	absolute path to the temporary directory 
+	[-t, --tmp]	   < path >	absolute path to the temporary directory
 					(default: \$CBICA_TMPDIR )
 
-Parameters:	
+Parameters:
 	[-M, --method]	   < int>	registration method(s) to use for registering the templates to the input image
 					1 - use dramms only (default)
 					2 - use ants only
@@ -63,66 +66,76 @@ Parameters:
 	[-I, --noIC]			do not apply intensity correction on the probabilities (default: apply)
 	[-S, --noSim]			do not apply similarity ranking on the probabilities (default: apply)
 	[-F, --noFuzzy]			do not add fuzzy segmentation of CSF to the probabilities (default: apply)
-	[-C, --noCere]			flag indicating that template without cerebellum should be used (default: use cerebellum)
 	[-W, --WML]	   < file >	absolute path to the WML mask (binary) which will be excluded from intensity correction (default: none)
 	[-c, --CSF]	   < float >	CSF Weight for MICO segmentation used to improve brain/non-brain segmentation (default: 1.2)
 	[-T, --regs]	   < int >	No. of templates to be used for registrations (default: 11)
 	[-a, --smooth]	   < int >	smooth the similarity ranks before using them for labelfusion (default: 0)
-	[-k, --int]	   < int >	keep intermediate files. 
+	[-k, --int]	   < int >	keep intermediate files.
 					0 - delete all intermediate files (default)
-					1 - Keep only the important files. 
-					2 - Keep all intermediate files 
+					1 - Keep only the important files.
+					2 - Keep all intermediate files
 
-Scheduler:	
+	[-B, --brainextraction]		flag indicating that brain extraction templates should be used (default: use roi segmentation templates)
+					using this flag implies the following changes to the args
+					--refPath @DATA_DIR@/Templates/BrainExtraction/
+					--ROI @DATA_DIR@/List/MUSE-SS_ROIs.csv
+					--refNum 50
+					--noIC
+					--noFuzzy
+					--mem 16
+
+
+
+Scheduler:
 	[-Q, --NOQ]			Flag indicating that computing cluster is not to be used
 	[-P, --MT]	   < int >	Flag indicating that the Registration jobs could be multi-threaded on the system (default: 4)
-					It will run the number of instances spcified by the -P option. 
+					It will run the number of instances spcified by the -P option.
 					Use this option depending on how much load you want to put on the CPU you are running the job on
-	
+
 	[-m, --mem]	  < int   >	Memory to be requested for each registration job submitted to the cluster
 					The memory requested for the final skullstripping job will be half of this
 					(default: 12GB)
 	[-l, --log]	   < path >	absolute path to the directory to store the LogFiles (default: \$HOME/muse_log_files/)
 	[-w, --hold]	   < pattern >	Hold queue for scheduler jobs, e.g.: 1794683. (default: no hold queue)
 	[-x, --priority]   < int >	Priority for scheduler jobs, -1023 < priority < 0 (default: -100)
-	[-d, --delay]	   < secs >	Delay between submission of scheduler/multi-threaded jobs, in seconds. 
+	[-d, --delay]	   < secs >	Delay between submission of scheduler/multi-threaded jobs, in seconds.
 					For minimization of disk I/O load (default: 5)
-	
-Miscellaneous:	
-	[-h, --help]     		this help page	
+
+Miscellaneous:
+	[-h, --help]     		this help page
 	[-v, --verbose]			Verbose Output for debugging purposes (default: OFF)
 	[-V, --version]			Version Information
-	
+
 
 Examples:
 	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz
-		Parcellate the input brain image that has been bias correceted and skull-stripped 
+		Parcellate the input brain image that has been bias correceted and skull-stripped
 		into ROIs using the default options
 
 	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -Q
-		Parcellate the input brain image using the default options, but without using the 
+		Parcellate the input brain image using the default options, but without using the
 		computing cluster
 
 	qsub -b y muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/
-		Submit the muse script to SGE which will internally do the processing and then 
+		Submit the muse script to SGE which will internally do the processing and then
 		submit the muse-registrations and muse-labelFusion jobs
-		
-	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/ -noCere
-		Parcellate the input brain image using the default options, but without the cerebellum
-		
+
+	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/ -B
+		Skull strip the input image using the default options
+
 	muse -i /Path/To/src/dir/Input_n3_str.nii.gz -D /Path/To/dest/dir/ -W /Path/To/WMLS/dir/Input_n3_str_WMLS_mask.nii.gz
-		Parcellate the input brain image but use the WMLS mask to exclude those regions from 
+		Parcellate the input brain image but use the WMLS mask to exclude those regions from
 		intensity weighting/correction
 
 	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/ -P 6
-		Parcellate the input brain image into ROIs using the default options. Additionally, 
+		Parcellate the input brain image into ROIs using the default options. Additionally,
 		use 6 CPU cores during processing of indivudual ROIs to speed up the process
-		
+
 	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/ --noIC --noSim --noFuzzy
-		Parcellate the input brain image into ROIs using Majority Voting to combine the results 
+		Parcellate the input brain image into ROIs using Majority Voting to combine the results
 		of different registrations
 
-	
+
 ERROR: Not enough arguments!!
 ##############################################
 
@@ -135,28 +148,28 @@ helpshort()
 cat <<HELP
 
 This script does the following:
-	
-	- MUSE is a Multi Atlas ROI Segmentation tool that uses the multi-atlas registration based approach 
+
+	- MUSE is a Multi Atlas ROI Segmentation tool that uses the multi-atlas registration based approach
 	  along with intensity weighting to parcellate the given human brain into a set of 153 regions of anatomical interest.
-	
+
 ##############################################
 USAGE :	$0 [OPTIONS]
 OPTIONS:
 
 Reqd:	[-i, --in]	   < file >	absolute path to the input file to be labeled
-	 
+
 Data:	[-D, --dest]	   < path >	absolute path to the destination where the results are to be stored (default: same as input)
 	[-T, --regs]	   < int >	No. of templates to be used for registrations (default: 11)
-	
+
 Misc:	[-h, --help]			detailed list of options and arguments
 
 Examples:
 	muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/
 		Parcellate the input brain image that has been bias correceted and skull-stripped into ROIs using the default options
-	
+
 	qsub muse -i /Path/To/Source/Directory/Input_n3_str.nii.gz -D /Path/To/Destination/Directory/
 		Submit the muse script to SGE which will internally do the processing and then submit the muse-registrations and muse-labelFusion jobs
-		
+
 ERROR: Not enough arguments!!
 ##############################################
 
@@ -167,7 +180,7 @@ exit 1
 cleanUpandExit()
 {
 	echo -e ":o:o:o:o:o Aborting Operations .... \n\n"
-	
+
 	executionTime
 	exit 1
 }
@@ -179,119 +192,119 @@ parse()
 			-h|--help)
 				help;
 				shift 1;;
-		     	-i|--in) 
+		     	-i|--in)
 				input=$2;
-				
+
 				checkFile $input
-				
-				temp=`FileAtt $input`				
+
+				temp=`FileAtt $input`
 				InExt=`echo $temp | awk '{ print $1 }'`
 				InbName=`echo $temp | awk '{ print $2 }'`
 				InDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				input=${InDir}/${InbName}.${InExt}
-				
+
 				shift 2;;
-		     	-W|--WML) 
+		     	-W|--WML)
 				WML=$2;
 
 				checkFile $WML
-				
-				temp=`FileAtt $WML`				
+
+				temp=`FileAtt $WML`
 				WMLExt=`echo $temp | awk '{ print $1 }'`
 				WMLbName=`echo $temp | awk '{ print $2 }'`
 				WMLDir=`echo $temp | awk '{ print $3 }'`
-				
+
 				WML=${WMLDir}/${WMLbName}.${WMLExt}
 
 				shift 2;;
 			-R|--ROI)
 				ROI=$2;
-				
+
 				checkFile $ROI
 				shift 2;;
-			-r|--refPath) 
+			-r|--refPath)
 				ref=`checkPath $2`;
 				shift 2;;
-			-n|--refNum) 
+			-n|--refNum)
 				refNum=$2;
 				shift 2;;
-			-D|--dest) 
+			-D|--dest)
 				dest=`checkPath $2`;
 				shift 2;;
-			-l|--log) 
+			-l|--log)
 				log=`checkPath $2`;
 				shift 2;;
-			-t|--tmp) 
+			-t|--tmp)
 				tmpDirToUse=`checkPath $2`;
 				shift 2;;
-			-T|--regs) 
+			-T|--regs)
 				regs=$2;
 				shift 2;;
-			-g|--regWt) 
+			-g|--regWt)
 				regWt=$2;
 				shift 2;;
-			-s|--syn) 
+			-s|--syn)
 				syn=$2;
 				shift 2;;
-			-c|--CSF) 
+			-c|--CSF)
 				CSF=$2;
 				shift 2;;
-			-k|--int) 
+			-k|--int)
 				int=$2;
 				shift 2;;
-			-I|--noIC) 
+			-I|--noIC)
 				IC=0;
 				shift 1;;
-			-S|--noSim) 
+			-S|--noSim)
 				Sim=0;
 				shift 1;;
-			-F|--noFuzzy) 
+			-F|--noFuzzy)
 				useFuzzy=0;
 				shift 1;;
-			-C|--noCere) 
-				Cere=0;
+			-B|--brainextraction)
+				BrainExtraction=1;
 				shift 1;;
-			-p|--ranks) 
+			-p|--ranks)
 				ranks=1;
 				shift 1;;
-			-M|--method) 
+			-M|--method)
 				method=$2;
 				shift 2;;
-			-d|--delay) 
+			-d|--delay)
 				delay=$2;
 				shift 2;;
-			-x|--priority) 
+			-x|--priority)
 				priority=$2;
 				shift 2;;
-			-v|--verbose) 
+			-v|--verbose)
 				verbose=1;
 				shift 1;;
-			-w|--hold) 
+			-w|--hold)
 				hold=$2;
 				shift 2;;
-			-Q|--NOQ) 
+			-Q|--NOQ)
 				NOQ=1;
 				shift 1;;
-			-P|--MT) 
+			-P|--MT)
 				MT=$2;
 				shift 2;;
-			-V|--version) 
-				print_version; 
+			-V|--version)
+				print_version;
 				exit 0;;
-			-m|--mem) 
+			-m|--mem)
 				mem=$2;
-				shift 2;;			
-			-o|--mask) 
+				shift 2;;
+			-o|--mask)
 				mask=$2;
-				shift 2;;			
+				shift 2;;
 			-a|--smooth)
 				smooth=$2;
-				shift 2;;			
-			-*) 
+				shift 2;;
+			-*)
 				echo "ERROR: no such option $1";
 				helpshort;;
-			 *) 
+			 *)
 				break;;
 		esac
 	done
@@ -302,7 +315,7 @@ import()
 	ext=$1
 	inFile=$2
 	outFile=$3
-	
+
 	if [ ! -f ${outFile}.nii.gz ]
 	then
 		if [ "${ext}" == "nii.gz" ] || [ "${ext}" == "nii" ] || [ "${ext}" == "img" ]
@@ -313,7 +326,7 @@ import()
 		then
 			echoV "nifti1_test -zn1 ${inFile%.hdr}.img ${outFile}"
 			nifti1_test -zn1 ${inFile%.hdr}.img ${outFile}
-		fi	
+		fi
 	fi
 }
 
@@ -363,7 +376,7 @@ verbose=0
 IC=1
 Sim=1
 useFuzzy=1
-Cere=1
+BrainExtraction=0
 ranks=0
 priority=-100
 holdqueue=""
@@ -382,9 +395,9 @@ ref=""
 FSLOUTPUTTYPE=NIFTI_GZ; export $FSLOUTPUTTYPE
 
 ### Specifying the trap signal
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM 
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM
 trap "checkExitCode 1 '\nProgram Interrupted. Received SIGKILL signal'" SIGKILL
 
 ### Reading the arguments
@@ -430,19 +443,33 @@ fi
 TMPin=${TMP}${InbName}.nii.gz
 TMPref=${TMP}Template_Mean.nii.gz
 
-# Deciding whether to use templates with cerebellum or without
+# Checking if brain extraction is requested, instead of ROI segmentation
+if [ $BrainExtraction -eq 1 ] && [ -z "$ref" ]
+then
+	ref=${refPath}BrainExtraction/
+	ROI=@DATA_DIR@/List/MUSE-SS_ROIs.csv
+	refNum=50
+	IC=0
+	Sim=1
+	useFuzzy=0
+	mem=16
+fi
+
+# Is brainextraction is not requested, and there is no refPath provided
 if [ -z "$ref" ]
 then
-	case $Cere in
-		0) ref=${refPath}NoCere/ ;;
-		1) ref=${refPath}WithCere/ ;;
-	esac
+	ref=${refPath}WithCere/
 fi
 
 ### Making sure the output filenames are set
 if [ -z "$mask" ]
 then
-	mask=${InbName}_muse
+	if [ $BrainExtraction -eq 1 ]
+	then
+		mask=${InbName}_muse-ss
+	else
+		mask=${InbName}_muse
+	fi
 fi
 
 ### Checking if all Input files exist
@@ -494,12 +521,12 @@ then
 	echoV "----->	Calculating the similarity between the linearly registered input image and templates ..." 1
 
 	for (( i=1;i<=${refNum};i++ ))
-	do 
+	do
 		echo -e "`${DRAMMS}CalculateImageSimilarity \
 			${TMP}${InbName}_12dof.nii.gz \
 			${ref}Template${i}_12dof.nii.gz \
 			-C | awk '$2 == "=" { print $3 }'` \t $i" >> ${TMP}Similarities.txt
-	
+
 	done
 
 	TopTemps=`cat ${TMP}Similarities.txt | sort -nr | head -${regs} | awk '{ print $2 }'`
@@ -527,7 +554,7 @@ then
 		mkdirV $dest
 	fi
 
-	if [ "$verbose" == "1" ]	
+	if [ "$verbose" == "1" ]
 	then
 		mv -v ${TMP}* ${dest}
 	else
@@ -558,16 +585,16 @@ do
 	do
 		### Checking if all files related to this template and registration method exist
 		fileCheck=""
-		if [ ! -f ${dest}${InbName}-Template${i}_label_InSpace_${registrationmethod}.nii.gz ] || [ ! -f ${dest}${InbName}-Template${i}_InSpace_${registrationmethod}.nii.gz ] 
+		if [ ! -f ${dest}${InbName}-Template${i}_label_InSpace_${registrationmethod}.nii.gz ] || [ ! -f ${dest}${InbName}-Template${i}_InSpace_${registrationmethod}.nii.gz ]
 		then
 			fileCheck="Absent"
 		fi
-		
+
 		if [ "$Sim" == "1" ] && [ ! -f ${dest}${InbName}-Template${i}_Sim_${registrationmethod}.nii.gz ]
 		then
 			fileCheck="Absent"
 		fi
-		
+
 		if [ "$fileCheck" == "Absent" ]
 		then
 			### Deciding on which script to use depending on the method selected
@@ -582,7 +609,7 @@ do
 				dramms)	CMD="${CMD} -reg $regWt" ;;
 				ants)	CMD="${CMD} -reg $syn" ;;
 			esac
-			
+
 			CMD="${CMD} \
 				 -in ${input} \
 				 -ref ${ref}Template${i}.nii.gz \
@@ -601,7 +628,7 @@ do
 
 				### Append all job ids to this string
 				holdqueue="${holdqueue} ${jid}"
-			 
+
 			 	### Sleep for a little while and then submit the next job to avoid overloading disk I/O
 				sleep ${delay}s
 
@@ -609,7 +636,7 @@ do
 			then
 				echo -e "\n\n--------> RUNNING REGISTRATION WITH TEMPLATE${i} at `date`
 				LOGFILE: ${log}muse-${registrationmethod}-registrations-Template${i}-${PID}.log "
-		
+
 				${CMD} > ${log}muse-${registrationmethod}-registrations-Template${i}-${PID}.log 2>&1
 
 			elif [ "$NOQ" == 1 ] && [ $MT -gt 1 ]
@@ -622,7 +649,7 @@ do
 					stoppedJobs=`jobs -ps | wc -l`
 					sleep 2s
 				done
-		
+
 				### Allows for control over the number of jobs running in the background
 				BGjobsNum=`jobs -p | wc -l`
 				while [ $BGjobsNum -ge $MT ]
@@ -631,12 +658,12 @@ do
 					BGjobsNum=`jobs -p | wc -l`
 				done
 
-				echo -e "\n\n--------> RUNNING REGISTRATION WITH TEMPLATE${i} at `date` 
+				echo -e "\n\n--------> RUNNING REGISTRATION WITH TEMPLATE${i} at `date`
 				LOGFILE: ${log}muse-${registrationmethod}-registrations-Template${i}-${PID}.log "
 
 				${CMD} > ${log}muse-${registrationmethod}-registrations-Template${i}-${PID}.log 2>&1 &
-				 
-				bgJID=$! 
+
+				bgJID=$!
 		 		if [ -z "${BGjobs}" ]
 				then
 					BGjobs="$bgJID"
@@ -691,33 +718,33 @@ CMD="${CMD} \
  	 -method $method \
  	 -smooth $smooth"
 
- 	 
+
 ### Calculating the memory requirement for submitting to the computing cluster
-VMEM=$(( $MT * 1 ))
+VMEM=4
 
 if [ "$NOQ" == 0 ]
 then
 	QSUB=`setSubmitCMD ${VMEM} $MT ${holdqueue} || checkExitCode 1 '\nJob submission command not set. Exiting MUSE!'`
-	
+
 	$QSUB $CMD;
 
 elif [ "$NOQ" == 1 ] && [ $MT -le 1 ]
 then
 	echo -e "\n\n--------> GENERATING LABELED BRAIN IMAGE at `date`
 	LOGFILE: ${log}muse-labelFusion-${PID}.log "
-	
+
 	${CMD} > ${log}muse-labelFusion-${PID}.log 2>&1
-	
-	
+
+
 elif [ "$NOQ" == 1 ] && [ $MT -gt 1 ]
 then
 	echo -e "\n\n--------> GENERATING LABELED BRAIN IMAGE at `date`
 	LOGFILE: ${log}muse-labelFusion-${PID}.log "
-	
+
 	${CMD} > ${log}muse-labelFusion-${PID}.log 2>&1 &
 
 
-	bgJID=$! 
+	bgJID=$!
 	if [ -z "${BGjobs}" ]
 	then
 		BGjobs="$bgJID"
@@ -728,7 +755,7 @@ then
 	wait $BGjobs
 fi
 
-### Execution Time 
+### Execution Time
 executionTime $startTimeStamp
 
 ################################################ END ################################################

@@ -1,4 +1,6 @@
 #!/bin/bash
+source /m/Dev/pijp-multiatlas/venv/bin/activate || (echo "could not source pijp-multiatlas/venv/bin/activate" 1>&2 && exit -1)
+export FSLVERSION=6.0.0
 
 #. ${BASIS_BASH_UTILITIES} || { echo "Failed to source BASIS utilities!" 1>&2; exit 1; }
 . @LIBRARY_DIR@/muse-functions || { echo "Failed to source MUSE functions!" 1>&2; exit 1; }
@@ -37,10 +39,10 @@ Optional:	-dest	   < path >	absolute path to the destination where the results a
 		-v	   < 0/1 >	verbose output (default: 0 - verbose off)
 		-V			Version Information
 		-tmp	   < path >	absolute path to the temporary directory
-		-int	   < int >	keep intermediate files. 
+		-int	   < int >	keep intermediate files.
 					0 - delete all intermediate files (default)
-					1 - Keep only the important files. 
-					2 - Keep all intermediate files 
+					1 - Keep only the important files.
+					2 - Keep all intermediate files
 
 ERROR: Not enough arguments!!
 ##############################################
@@ -52,7 +54,7 @@ exit 1
 cleanUpandExit()
 {
 	echo -e ":o:o:o:o:o Aborting Operations .... \n\n"
-	
+
 	if [ -d "$TMP" ]
 	then
 		if [ "$TMP" == "$dest" ]
@@ -67,8 +69,8 @@ cleanUpandExit()
 			fi
 		fi
 	fi
-	
-	executionTime		
+
+	executionTime
 	exit 1
 }
 
@@ -76,42 +78,42 @@ parse()
 {
 	while [ -n "$1" ]; do
 		case $1 in
-			-h) 
+			-h)
 				help;
 				shift 1;;
-		     	-R) 
+		     	-R)
 				ranks=$2;
-				checkFile $ranks; 
+				checkFile $ranks;
 
 				shift 2;;
-			-dest) 
+			-dest)
 				dest=`checkPath $2`;
 				shift 2;;
-			-v) 
+			-v)
 				verbose=$2;
 				shift 2;;
-			-comb) 
+			-comb)
 				comb=$2;
 				shift 2;;
-			-scripts) 
+			-scripts)
 				scripts=`checkPath $2`;
 				shift 2;;
-			-Ranks) 
+			-Ranks)
 				Ranks=$2;
 				shift 2;;
-			-V) 
-				print_version; 
+			-V)
+				print_version;
 				exit 0;;
-			-int) 
+			-int)
 				int=$2;
 				shift 2;;
-			-tmp) 
+			-tmp)
 				tmpDirToUse=`checkPath $2`;
 				shift 2;;
-			-*) 
+			-*)
 				echo "ERROR: no such option $1";
 				help;;
-			 *) 
+			 *)
 				break;;
 		esac
 	done
@@ -153,9 +155,9 @@ verbose=0
 int=0
 
 ### Specifying the trap signal
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT 
-trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM 
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGHUP signal'" SIGHUP
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGINT signal'" SIGINT
+trap "checkExitCode 1 '\nProgram Interrupted. Received SIGTERM signal'" SIGTERM
 trap "checkExitCode 1 '\nProgram Interrupted. Received SIGKILL signal'" SIGKILL
 
 ### Reading the arguments
@@ -207,14 +209,14 @@ echoV "\n--> ${scripts}muse_combineRoiMapsSparse \n
 if [ "$verbose" == "1" ]
 then
 	${scripts}muse-combineRoiMapsIter \
-	 ${ranks} \
-	 ${TMP}${comb};
+        ${ranks} \
+        ${TMP}${comb};
 else
 	${scripts}muse-combineRoiMapsIter \
-	 ${ranks} \
-	 ${TMP}${comb} > ${TMP}Debug.log 2>&1;
+        ${ranks} \
+        ${TMP}${comb} > ${TMP}Debug.log 2>&1;
 fi
-	
+
 if [ ! -f ${TMP}${comb} ]
 then
 	checkExitCode 1 "\nERROR: Combination of Rank Masks failed!!!"
@@ -250,10 +252,10 @@ else
 fi
 
 checkExitCode $? "\nERROR: Conversion to byte failed!!!"
-	
+
 rmV ${TMP}${comb}
 mvV ${TMP}${comb%.nii.gz}_byte.nii.gz ${dest}${comb}
-	
+
 ### If the user does not need the individual Rank Masks, delete them
 if [ "$Ranks" == "0" ] && [ "$int" != 2 ]
 then

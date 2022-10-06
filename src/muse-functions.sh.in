@@ -28,7 +28,7 @@ executionTime()
 
 	executionTimeendTimeStamp=`date +%s`
 	executionTimetotal=$[ (${executionTimeendTimeStamp} - ${startTimeStamp}) ]
-	
+
 	if [ ${executionTimetotal} -gt 60 ]
 	then
 		if [ ${executionTimetotal} -gt 3600 ]
@@ -59,23 +59,23 @@ checkPath()
 FileAtt()
 {
 	FileAttIP=$1;
-	
+
 	FileAttdir="$(cd "$(dirname "$FileAttIP")" && pwd -P)"
 	FileAttext=${FileAttIP##*.}
 	FileAttbName=`basename ${FileAttIP%.${FileAttext}}`
-	
+
 	if [ "$FileAttext" == "gz" ]
 	then
 		FileAttext=${FileAttbName##*.}.${FileAttext}
 		FileAttbName=`basename ${FileAttIP%.${FileAttext}}`
 	fi
-	
+
 	if [ "$FileAttext" != "nii.gz" ] && [ "$FileAttext" != "hdr" ] && [ "$FileAttext" != "img" ] && [ "$FileAttext" != "nii" ]
 	then
 		echo -e "\nERROR: Input file extension $FileAttext not recognized! Please check ..."
 		cleanUpandExit
 	fi
-	
+
 	echo $FileAttext $FileAttbName $FileAttdir
 }
 
@@ -181,7 +181,7 @@ rmdirV()
 	then
 		if [ "$verbose" == "1" ]
 		then
-			rmdir -v $1
+			rmdir -rv $1
 		else
 			rmdir $1
 		fi
@@ -192,8 +192,8 @@ rmdirV()
 convertToNifti()
 {
 	convertToNiftiInput=$1
-	
-	convertToNiftitemp=`FileAtt $convertToNiftiInput`				
+
+	convertToNiftitemp=`FileAtt $convertToNiftiInput`
 	convertToNiftiInExt=`echo $convertToNiftitemp | awk '{ print $1 }'`
 	convertToNiftiInbName=`echo $convertToNiftitemp | awk '{ print $2 }'`
 	convertToNiftiInDir=`dirname $convertToNiftiInput`
@@ -206,7 +206,7 @@ convertToNifti()
 		elif [ "${convertToNiftiInExt}" == "hdr" ]
 		then
 			nifti1_test -zn1 ${convertToNiftiInput%.hdr}.img ${convertToNiftiInDir}/${convertToNiftiInbName}
-		fi	
+		fi
 	fi
 
 	if [ -f ${convertToNiftiInDir}/${convertToNiftiInbName}.nii.gz ]
@@ -222,8 +222,8 @@ convertToNifti()
 		elif [ "${convertToNiftiInExt}" == "img" ]
 		then
 			rmV ${convertToNiftiInput%.img}.hdr
-			rmV ${convertToNiftiInput}		
-		fi	
+			rmV ${convertToNiftiInput}
+		fi
 	else
 		echoV "\nConversion to NIFTIGZ failed: $1"
 	fi
@@ -234,17 +234,17 @@ createTempDir()
 {
 	tmpDirPref=$1
 	tmpDirPID=$2
-		
+
 	# Decide the directory prefix
 	if [ -n "$tmpDirToUse" ]
 	then
 		LocalTempDir=$tmpDirToUse
-		
-		# Getting the current TMPDIR variable and then exporting the user specified 
+
+		# Getting the current TMPDIR variable and then exporting the user specified
 		# directory as TMPDIR variable so mktemp performs as intended.
-		tmpTMPDIR=${TMPDIR}		
-		export TMPDIR=$tmpDirToUse	
-		
+		tmpTMPDIR=${TMPDIR}
+		export TMPDIR=$tmpDirToUse
+
 	elif [ -n "$CBICA_TMPDIR" ]
 	then
 		LocalTempDir=$CBICA_TMPDIR
@@ -252,7 +252,7 @@ createTempDir()
 	then
 		LocalTempDir=$TMPDIR
 	else
-		LocalTempDir=/tmp	
+		LocalTempDir=/tmp
 	fi
 
 	# Create the LocalTempDir directory if it doesn't exist
@@ -263,7 +263,7 @@ createTempDir()
 
 	# Create the temp dir
 	TMP=`mktemp -d -p ${LocalTempDir} ${tmpDirPref}_${tmpDirPID}.XXXXXXXXXX`/ || { echo -e "\nCreation of Temporary Directory failed."; exit 1; }
-	
+
 	# Resetting the TMPDIR variable to its original value
 	export TMPDIR=$tmpTMPDIR
 }
@@ -271,7 +271,7 @@ createTempDir()
 checkPythonModules()
 {
 	checkPythonModuleName=$1
-	
+
 	checkPythonModuleNameReturn=`python -c "if True:
 	try:
         	import ${checkPythonModuleName}
@@ -279,11 +279,11 @@ checkPythonModules()
         	print 1
     	else:
         	print 0"`
-        	
+
   	if [ $checkPythonModuleNameReturn != 0 ]
 	then
 		echo -e "${1} not installed OR not found. Aborting operations ..."
 		cleanUpandExit
 	fi
-      
+
 }

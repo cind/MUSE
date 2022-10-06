@@ -40,10 +40,10 @@ RUNTIME REQUIREMENTS
 
   - mico/1.0.0 (or higher)
 	Download: http://www.cbica.upenn.edu/sbia/software/request.php?software=mico
-	
+
   - afni/2008_07_18_1710/11_20_2009 (or higher)
 	    Web Site: http://afni.nimh.nih.gov/afni/
-  	
+
   - fsl/4.1.5 (or higher)
 	    Web Site: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/
 	    Download: http://fsl.fmrib.ox.ac.uk/fsldownloads/fsldownloadmain.html
@@ -54,6 +54,12 @@ BUILDING THE SOFTWARE FROM SOURCES
   Build Dependencies
   ------------------
 
+This repository requries that you have `git lfs` installed and initiated in order to
+get the Template NiFTI files.
+
+https://github.com/git-lfs/git-lfs/releases/tag/v3.2.0
+
+**Install `git lfs` and run `git lfs install` BEFORE cloning.**
 
   Build Steps
   -----------
@@ -76,10 +82,10 @@ BUILDING THE SOFTWARE FROM SOURCES
   $ tar xzf $package-$version-source.tar.gz
   $ mkdir $package-$version-build
   $ cd $package-$version-build
-  $ cmake -D CMAKE_INSTALL_PREFIX=/Path/To/Install/Dir -D SCHEDULER=??? ../$package-$version-source
+  $ cmake -D CMAKE_INSTALL_PREFIX=/Path/To/Install/Dir -D SCHEDULER=??? ..
   $ make
   $ make test (optional) NOT INCLUDED IN THIS PACKAGE
-  $ make install 
+  $ make install
 
   An exhaustive list of minimum build dependencies, including the build tools
   along detailed step-by-step build, test, and installation instructions can
@@ -91,7 +97,7 @@ BUILDING THE SOFTWARE FROM SOURCES
   If this guide does not help you resolve the issue, please contact us at
   <sbia-software at uphs.upenn.edu>. In case of failing tests, please attach
   the output of the following command to your email:
- 
+
   $ ctest -V >& test.log
 
   In the following, only package-specific CMake settings available to

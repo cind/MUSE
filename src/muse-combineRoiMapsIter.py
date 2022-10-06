@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@VENV@/bin/python
 #
 # @file  muse_combineRoiMapsIter.py
 # @brief Combine roi probability maps for a single subject
@@ -11,7 +11,7 @@
 
 
 
-#Usage 
+#Usage
 # ############################################ #
 # muse_combineRoiMapsIter.py /Path/To/Input/List.txt /Path/To/Destination/outImgName
 ################################################
@@ -32,7 +32,7 @@ DestFile=str(sys.argv[2])
 ### Sanity check on the arguments
 if not InputList or not DestFile:
 	print("ERROR: Required input options not provided!!!")
-	sys.exit(0) 
+	sys.exit(0)
 
 ### Printing input arguments
 print('\n\n')
@@ -74,9 +74,9 @@ ctr=1
 
 ### Combine roi images
 for line in lines:
-        
+
 	print(line)
-	
+
 	### Extract roi no
 	match=re.search('([\w.-]+)ROI_(\d+)_([\w.-]+)', line)
 	if match:
@@ -85,7 +85,7 @@ for line in lines:
 	else:
 		print('ERROR: No ROI_{roino} in file name !')
 		exit(1)
-	
+
 	### Read img, vectorize
 	img = nib.load(str.rstrip(line))
 	a=img.get_data()
