@@ -673,89 +673,15 @@ do
 
 
 			 	### Sleep for a little while and then submit the next job to avoid overloading disk I/O
-				sleep `echo "scale=0; ${delay} * 4 * ${MT}" | bc`s
+				sleep ` ${delay} * 4 * ${MT}" | bc`s
 			fi
 		fi
 	done
 done
 
-if [ "$NOQ" == 1 ] && [ $MT -gt 1 ]
-then
-	wait $BGjobs
-fi
-
-# CBQ mask
-### Checking and Formulating the options
-if [ -n "$tmpDirToUse" ]
-then
-	CMD="${scripts}muse-labelFusion -tmp $tmpDirToUse"
-else
-	CMD="${scripts}muse-labelFusion"
-fi
-
-if [ -n "$WML" ]
-then
-	CMD="${CMD} -WML $WML"
-fi
-
-CMD="${CMD} \
- 	 -Fuzzy $useFuzzy \
- 	 -in ${input} \
- 	 -dest ${dest} \
- 	 -ROI ${ROI} \
- 	 -Templates ${dest}${InbName}-ListOfTemplates.txt \
- 	 -ic $IC \
- 	 -Sim $Sim \
- 	 -CSF $CSF \
- 	 -regs ${regs} \
- 	 -scripts ${scripts} \
- 	 -comb ${mask}.nii.gz \
- 	 -Ranks ${ranks} \
- 	 -v $verbose \
- 	 -MT $MT \
- 	 -int ${int} \
- 	 -log $log \
- 	 -method $method \
- 	 -smooth $smooth"
-
-
-### Calculating the memory requirement for submitting to the computing cluster
-VMEM=4
-
-if [ "$NOQ" == 0 ]
-then
-	QSUB=`setSubmitCMD ${VMEM} $MT ${holdqueue} || checkExitCode 1 '\nJob submission command not set. Exiting MUSE!'`
-
-	$QSUB $CMD;
-
-elif [ "$NOQ" == 1 ] && [ $MT -le 1 ]
-then
-	echo -e "\n\n--------> GENERATING LABELED BRAIN IMAGE at `date`
-	LOGFILE: ${log}muse-labelFusion-${PID}.log "
-
-	${CMD} > ${log}muse-labelFusion-${PID}.log 2>&1
-
-
-elif [ "$NOQ" == 1 ] && [ $MT -gt 1 ]
-then
-	echo -e "\n\n--------> GENERATING LABELED BRAIN IMAGE at `date`
-	LOGFILE: ${log}muse-labelFusion-${PID}.log "
-
-	${CMD} > ${log}muse-labelFusion-${PID}.log 2>&1 &
-
-
-	bgJID=$!
-	if [ -z "${BGjobs}" ]
-	then
-		BGjobs="$bgJID"
-	else
-		BGjobs="${BGjobs} $bgJID"
-	fi
-
-	wait $BGjobs
-fi
-
 ### Execution Time
 executionTime $startTimeStamp
 
-################################################ END ################################################
+# Return the registration job IDs.
+reg_ids=$("echo ${BGJobs}" | tr ' ' '\n')
+echo ${reg_ids}
