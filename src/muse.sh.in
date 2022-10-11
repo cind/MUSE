@@ -385,6 +385,7 @@ delay=5
 NOQ=0
 MT=4
 PID=$$
+job_ids=""
 BGjobs=""
 method=1
 mem=12
@@ -628,6 +629,7 @@ do
 
 				### Append all job ids to this string
 				holdqueue="${holdqueue} ${jid}"
+                job_ids+="${jid},"
 
 			 	### Sleep for a little while and then submit the next job to avoid overloading disk I/O
 				sleep ${delay}s
@@ -683,5 +685,4 @@ done
 executionTime $startTimeStamp
 
 # Return the registration job IDs.
-reg_ids=$("echo ${BGJobs}" | tr ' ' '\n')
-echo ${reg_ids}
+echo ${job_ids} | tr ',' '\n'
