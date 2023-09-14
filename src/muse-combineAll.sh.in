@@ -1,7 +1,6 @@
 #!/bin/bash
 export FSLVERSION=6.0.0
 export ANTSVERSION=ants-2017-12-07
-export AFNIVERSION=AFNI_19.1.15
 
 #. ${BASIS_BASH_UTILITIES} || { echo "Failed to source BASIS utilities!" 1>&2; exit 1; }
 . @LIBRARY_DIR@/muse-functions || { echo "Failed to source MUSE functions!" 1>&2; exit 1; }
